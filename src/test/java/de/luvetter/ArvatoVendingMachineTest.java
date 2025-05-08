@@ -247,7 +247,7 @@ class ArvatoVendingMachineTest {
         void should_add_coins(final EuroCoin coin) {
             vendingMachine.addCoins(coin, coin);
 
-            assertThat(vendingMachine.emptyCoin(coin)).isEqualTo(2);
+            assertThat(vendingMachine.emptyCoinType(coin)).isEqualTo(2);
         }
     }
 
@@ -259,11 +259,11 @@ class ArvatoVendingMachineTest {
             vendingMachine.setPrice(0, 120);
             vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
-            assertThat(vendingMachine.emptyCoin(EuroCoin.TWO_EURO)).isEqualTo(0);
-            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoin.FIFTY_CENTS)).isEqualTo(0);
-            assertThat(vendingMachine.emptyCoin(EuroCoin.TWENTY_CENTS)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoin.TEN_CENTS)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.TWO_EURO)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.FIFTY_CENTS)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.TWENTY_CENTS)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.TEN_CENTS)).isEqualTo(0);
         }
 
         @Test
@@ -272,8 +272,8 @@ class ArvatoVendingMachineTest {
             vendingMachine.setPrice(0, 120);
             vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
-            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoinType(EuroCoin.ONE_EURO)).isEqualTo(0);
         }
     }
 

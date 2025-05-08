@@ -14,9 +14,10 @@ import java.util.stream.Stream;
 public class ArvatoVendingMachine {
 
     private final int                         numberOfSlots;
-    private final Map<Integer, Queue<Object>> products = new HashMap<>();
-    private final Map<Integer, Integer>       prices   = new HashMap<>();
-    private final Map<EuroCoin, Integer>      register = new EnumMap<>(EuroCoin.class);
+    private final Map<Integer, Queue<Object>> products     = new HashMap<>();
+    private final Map<Integer, Integer>       prices       = new HashMap<>();
+    private final Map<EuroCoin, Integer>      register     = new EnumMap<>(EuroCoin.class);
+    private final CashRegister                cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
@@ -36,49 +37,16 @@ public class ArvatoVendingMachine {
         final int price = getPrice(slot);
         final int totalInserted = calculateTotalInserted(coins);
         validateInsetCoversPrice(slot, price, totalInserted);
-        for (final EuroCoin coin : coins) {
-            register.compute(coin, (euroCoin, integer) -> integer + 1);
-        }
-        final EuroCoin[] change = getChange(totalInserted - price);
+        final EuroCoin[] change = cashRegister.getChange(price, coins);
         return new ProductAndChange(inventory.poll(), change);
     }
 
     public void addCoins(final EuroCoin... coins) {
-        for (final EuroCoin coin : coins) {
-            register.compute(coin, (euroCoin, integer) -> integer + 1);
-        }
+        cashRegister.addCoins(coins);
     }
 
-    public int emptyCoin(final EuroCoin coin) {
-        if (coin == null) {
-            throw new IllegalArgumentException("Bitte geben Sie eine Münze an");
-        }
-        final int amount = register.getOrDefault(coin, 0);
-        register.put(coin, 0);
-        return amount;
-    }
-
-    private EuroCoin[] getChange(final int targetChangeSum) {
-        int currentChangeSum = 0;
-        final List<EuroCoin> change = new ArrayList<>();
-        for (final EuroCoin coin : EuroCoin.values()) {
-            final int remaining = targetChangeSum - currentChangeSum;
-            final int maxPossibleCoins = remaining / coin.getCents();
-            if (maxPossibleCoins == 0) {
-                continue;
-            }
-            final int changeCoins = Math.min(register.get(coin), maxPossibleCoins);
-            register.put(coin, register.get(coin) - changeCoins);
-            for (int i = 0; i < changeCoins; i++) {
-                change.add(coin);
-                currentChangeSum += coin.getCents();
-            }
-        }
-        if (currentChangeSum != targetChangeSum) {
-            throw new IllegalStateException("Nicht genug Wechselgeld im Automaten");
-        }
-
-        return change.toArray(new EuroCoin[0]);
+    public int emptyCoinType(final EuroCoin coin) {
+        return cashRegister.emptyCoinType(coin);
     }
 
     private void validateInsetCoversPrice(final int slot, final int price, final int totalInserted) {
