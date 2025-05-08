@@ -3,10 +3,12 @@ package de.luvetter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -46,6 +48,31 @@ class ArvatoVendingMachineTest {
         }
 
         @Test
+        void should_return_no_change_if_insert_matches_price() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+
+            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(result).isNotNull()
+                    .extracting(ProductAndChange::change, InstanceOfAssertFactories.ARRAY)
+                    .isEmpty();
+        }
+
+        @Test
+        void should_return_change() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+            vendingMachine.addCoins(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS);
+
+            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.TWO_EURO);
+
+            assertThat(result).isNotNull()
+                    .extracting(ProductAndChange::change, InstanceOfAssertFactories.ARRAY)
+                    .containsExactlyInAnyOrder(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS);
+        }
+
+        @Test
         void should_remove_product_from_slot() {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
@@ -80,6 +107,17 @@ class ArvatoVendingMachineTest {
             assertThat(result).isNotNull()
                     .extracting(ProductAndChange::product)
                     .isEqualTo("Coke");
+        }
+
+        @Test
+        void should_throw_IllegalStateException_if_money_inventory_cannot_cover_change() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.TWO_EURO))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Nicht genug Wechselgeld im Automaten");
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke");
         }
 
         @Test
@@ -161,6 +199,44 @@ class ArvatoVendingMachineTest {
     }
 
     @Nested
+    class AddCoins {
+
+        @EnumSource(EuroCoins.class)
+        @ParameterizedTest
+        void should_add_coins(final EuroCoins coin) {
+            vendingMachine.addCoins(coin, coin);
+
+            assertThat(vendingMachine.emptyCoin(coin)).isEqualTo(2);
+        }
+    }
+
+    @Nested
+    class EmptyCoin {
+        @Test
+        void should_return_coins_for_sold_products() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(vendingMachine.emptyCoin(EuroCoins.TWO_EURO)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoins.FIFTY_CENTS)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoins.TWENTY_CENTS)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoins.TEN_CENTS)).isEqualTo(0);
+        }
+
+        @Test
+        void should_return_not_return_coins_twice() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(0);
+        }
+    }
+
+    @Nested
     class AddProducts {
 
         @Test
@@ -214,7 +290,7 @@ class ArvatoVendingMachineTest {
     @Nested
     class RemoveProducts {
 
-        private static final String COKE = "Coke";
+        private static final String COKE  = "Coke";
         private static final String PEPSI = "Pepsi";
 
         @BeforeEach

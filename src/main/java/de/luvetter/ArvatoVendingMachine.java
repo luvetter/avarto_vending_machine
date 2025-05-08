@@ -1,7 +1,9 @@
 package de.luvetter;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +16,16 @@ public class ArvatoVendingMachine {
     private final int                         numberOfSlots;
     private final Map<Integer, Queue<Object>> products = new HashMap<>();
     private final Map<Integer, Integer>       prices   = new HashMap<>();
+    private final Map<EuroCoins, Integer>     register = new EnumMap<>(EuroCoins.class);
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
         this.numberOfSlots = numberOfSlots;
+        for (final EuroCoins coin : EuroCoins.values()) {
+            register.put(coin, 0);
+        }
     }
 
     public ProductAndChange buy(final int slot, final EuroCoins... coins) {
@@ -30,7 +36,49 @@ public class ArvatoVendingMachine {
         final int price = getPrice(slot);
         final int totalInserted = calculateTotalInserted(coins);
         validateInsetCoversPrice(slot, price, totalInserted);
-        return new ProductAndChange(inventory.poll());
+        for (final EuroCoins coin : coins) {
+            register.compute(coin, (euroCoins, integer) -> integer + 1);
+        }
+        final EuroCoins[] change = getChange(totalInserted - price);
+        return new ProductAndChange(inventory.poll(), change);
+    }
+
+    public void addCoins(final EuroCoins... coins) {
+        for (final EuroCoins coin : coins) {
+            register.compute(coin, (euroCoins, integer) -> integer + 1);
+        }
+    }
+
+    public int emptyCoin(final EuroCoins coin) {
+        if (coin == null) {
+            throw new IllegalArgumentException("Bitte geben Sie eine Münze an");
+        }
+        final int amount = register.getOrDefault(coin, 0);
+        register.put(coin, 0);
+        return amount;
+    }
+
+    private EuroCoins[] getChange(final int targetChangeSum) {
+        int currentChangeSum = 0;
+        final List<EuroCoins> change = new ArrayList<>();
+        for (final EuroCoins coin : EuroCoins.values()) {
+            final int remaining = targetChangeSum - currentChangeSum;
+            final int maxPossibleCoins = remaining / coin.getCents();
+            if (maxPossibleCoins == 0) {
+                continue;
+            }
+            final int changeCoins = Math.min(register.get(coin) , maxPossibleCoins);
+            register.put(coin, register.get(coin) - changeCoins);
+            for (int i = 0; i < changeCoins; i++) {
+                change.add(coin);
+                currentChangeSum += coin.getCents();
+            }
+        }
+        if (currentChangeSum != targetChangeSum) {
+            throw new IllegalStateException("Nicht genug Wechselgeld im Automaten");
+        }
+
+        return change.toArray(new EuroCoins[0]);
     }
 
     private void validateInsetCoversPrice(final int slot, final int price, final int totalInserted) {
