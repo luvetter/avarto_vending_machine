@@ -1,6 +1,6 @@
 package de.luvetter;
 
-public record ProductAndChange(Object product, EuroCoins... change) {
+public record ProductAndChange(Object product, EuroCoin... change) {
     public ProductAndChange {
         if (product == null) {
             throw new IllegalArgumentException("Produkt darf nicht null sein");

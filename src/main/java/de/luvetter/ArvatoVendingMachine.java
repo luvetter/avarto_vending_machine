@@ -16,19 +16,19 @@ public class ArvatoVendingMachine {
     private final int                         numberOfSlots;
     private final Map<Integer, Queue<Object>> products = new HashMap<>();
     private final Map<Integer, Integer>       prices   = new HashMap<>();
-    private final Map<EuroCoins, Integer>     register = new EnumMap<>(EuroCoins.class);
+    private final Map<EuroCoin, Integer>      register = new EnumMap<>(EuroCoin.class);
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
         this.numberOfSlots = numberOfSlots;
-        for (final EuroCoins coin : EuroCoins.values()) {
+        for (final EuroCoin coin : EuroCoin.values()) {
             register.put(coin, 0);
         }
     }
 
-    public ProductAndChange buy(final int slot, final EuroCoins... coins) {
+    public ProductAndChange buy(final int slot, final EuroCoin... coins) {
         final Queue<Object> inventory = getInventory(slot);
         if (inventory.isEmpty()) {
             throw new IllegalStateException("Slot " + slot + " ist leer");
@@ -36,20 +36,20 @@ public class ArvatoVendingMachine {
         final int price = getPrice(slot);
         final int totalInserted = calculateTotalInserted(coins);
         validateInsetCoversPrice(slot, price, totalInserted);
-        for (final EuroCoins coin : coins) {
-            register.compute(coin, (euroCoins, integer) -> integer + 1);
+        for (final EuroCoin coin : coins) {
+            register.compute(coin, (euroCoin, integer) -> integer + 1);
         }
-        final EuroCoins[] change = getChange(totalInserted - price);
+        final EuroCoin[] change = getChange(totalInserted - price);
         return new ProductAndChange(inventory.poll(), change);
     }
 
-    public void addCoins(final EuroCoins... coins) {
-        for (final EuroCoins coin : coins) {
-            register.compute(coin, (euroCoins, integer) -> integer + 1);
+    public void addCoins(final EuroCoin... coins) {
+        for (final EuroCoin coin : coins) {
+            register.compute(coin, (euroCoin, integer) -> integer + 1);
         }
     }
 
-    public int emptyCoin(final EuroCoins coin) {
+    public int emptyCoin(final EuroCoin coin) {
         if (coin == null) {
             throw new IllegalArgumentException("Bitte geben Sie eine Münze an");
         }
@@ -58,16 +58,16 @@ public class ArvatoVendingMachine {
         return amount;
     }
 
-    private EuroCoins[] getChange(final int targetChangeSum) {
+    private EuroCoin[] getChange(final int targetChangeSum) {
         int currentChangeSum = 0;
-        final List<EuroCoins> change = new ArrayList<>();
-        for (final EuroCoins coin : EuroCoins.values()) {
+        final List<EuroCoin> change = new ArrayList<>();
+        for (final EuroCoin coin : EuroCoin.values()) {
             final int remaining = targetChangeSum - currentChangeSum;
             final int maxPossibleCoins = remaining / coin.getCents();
             if (maxPossibleCoins == 0) {
                 continue;
             }
-            final int changeCoins = Math.min(register.get(coin) , maxPossibleCoins);
+            final int changeCoins = Math.min(register.get(coin), maxPossibleCoins);
             register.put(coin, register.get(coin) - changeCoins);
             for (int i = 0; i < changeCoins; i++) {
                 change.add(coin);
@@ -78,7 +78,7 @@ public class ArvatoVendingMachine {
             throw new IllegalStateException("Nicht genug Wechselgeld im Automaten");
         }
 
-        return change.toArray(new EuroCoins[0]);
+        return change.toArray(new EuroCoin[0]);
     }
 
     private void validateInsetCoversPrice(final int slot, final int price, final int totalInserted) {
@@ -90,11 +90,11 @@ public class ArvatoVendingMachine {
         }
     }
 
-    private int calculateTotalInserted(final EuroCoins[] coins) {
+    private int calculateTotalInserted(final EuroCoin[] coins) {
         return Stream.ofNullable(coins)
                        .flatMap(Arrays::stream)
                        .filter(Objects::nonNull)
-                       .mapToInt(EuroCoins::getCents)
+                       .mapToInt(EuroCoin::getCents)
                        .sum();
     }
 

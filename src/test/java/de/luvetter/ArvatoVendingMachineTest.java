@@ -44,7 +44,7 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
 
-            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            final ProductAndChange result = vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
             assertThat(result).isNotNull()
                     .extracting(ProductAndChange::product)
@@ -56,7 +56,7 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
 
-            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            final ProductAndChange result = vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
             assertThat(result).isNotNull()
                     .extracting(ProductAndChange::change, InstanceOfAssertFactories.ARRAY)
@@ -81,29 +81,29 @@ class ArvatoVendingMachineTest {
             return Stream.of(
                     new ChangeTestCase("return 80 cent in 20 cent coins")
                             .withPrice(120)
-                            .withAvailableChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
-                            .withInsertedCoins(EuroCoins.TWO_EURO)
-                            .withExpectedChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS),
+                            .withAvailableChange(EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS)
+                            .withInsertedCoins(EuroCoin.TWO_EURO)
+                            .withExpectedChange(EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TWENTY_CENTS),
                     new ChangeTestCase("return 80 cent with just inserted 50 cent coin")
                             .withPrice(120)
-                            .withAvailableChange(EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
-                            .withInsertedCoins(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS)
-                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS),
+                            .withAvailableChange(EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS)
+                            .withInsertedCoins(EuroCoin.FIFTY_CENTS, EuroCoin.FIFTY_CENTS, EuroCoin.FIFTY_CENTS, EuroCoin.FIFTY_CENTS)
+                            .withExpectedChange(EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS),
                     new ChangeTestCase("return 80 cent in 50 cent, 20 cent and 10 cent coin")
                             .withPrice(120)
-                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
-                            .withInsertedCoins(EuroCoins.TWO_EURO)
-                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS),
+                            .withAvailableChange(EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS)
+                            .withInsertedCoins(EuroCoin.TWO_EURO)
+                            .withExpectedChange(EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS),
                     new ChangeTestCase("return 120 cent with 2x 50 cent coins")
                             .withPrice(80)
-                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
-                            .withInsertedCoins(EuroCoins.TWO_EURO)
-                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS),
+                            .withAvailableChange(EuroCoin.FIFTY_CENTS, EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS)
+                            .withInsertedCoins(EuroCoin.TWO_EURO)
+                            .withExpectedChange(EuroCoin.FIFTY_CENTS, EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS),
                     new ChangeTestCase("return 120 cent with 1x 1 euro coin")
                             .withPrice(80)
-                            .withAvailableChange(EuroCoins.ONE_EURO, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
-                            .withInsertedCoins(EuroCoins.TWO_EURO)
-                            .withExpectedChange(EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS)//,
+                            .withAvailableChange(EuroCoin.ONE_EURO, EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS)
+                            .withInsertedCoins(EuroCoin.TWO_EURO)
+                            .withExpectedChange(EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS)//,
                     // TODO: Wechselgeld algoryhtmus so erweitern, dass auch Münzgrößen geskippt werden, die von der Größe passen, aber nicht genug kleiner Gößen vergügbar sind, um die Summe passend zu bekommen
 //                    new ChangeTestCase("return 80 cent with 4x 20 coins even if 50 is available, but no 10 cent")
 //                            .withPrice(120)
@@ -118,7 +118,7 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
 
-            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
             assertThat(vendingMachine.listProducts(0)).isEmpty();
         }
@@ -129,9 +129,9 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke", "Pepsi");
             vendingMachine.setPrice(0, 120);
 
-            final ProductAndChange result1 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
-            final ProductAndChange result2 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
-            final ProductAndChange result3 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            final ProductAndChange result1 = vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
+            final ProductAndChange result2 = vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
+            final ProductAndChange result3 = vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
             assertThat(result1.product()).isEqualTo("Coke");
             assertThat(result2.product()).isEqualTo("Coke");
@@ -155,7 +155,7 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
 
-            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.TWO_EURO))
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoin.TWO_EURO))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Nicht genug Wechselgeld im Automaten");
             assertThat(vendingMachine.listProducts(0)).containsExactly("Coke");
@@ -166,14 +166,14 @@ class ArvatoVendingMachineTest {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
 
-            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.ONE_EURO))
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoin.ONE_EURO))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Slot 0 kostet 120 Cent");
         }
 
         @Test
         void should_throw_IllegalStateException_if_slot_is_empty() {
-            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.TWO_EURO))
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoin.TWO_EURO))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Slot 0 ist leer");
         }
@@ -181,14 +181,14 @@ class ArvatoVendingMachineTest {
         @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
         @ParameterizedTest
         void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-            assertThatThrownBy(() -> vendingMachine.buy(slot, EuroCoins.TWO_EURO))
+            assertThatThrownBy(() -> vendingMachine.buy(slot, EuroCoin.TWO_EURO))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
         }
 
         @NullAndEmptySource
         @ParameterizedTest
-        void should_throw_IllegalArgumentException_if_coins_is_missing(final EuroCoins... coins) {
+        void should_throw_IllegalArgumentException_if_coins_is_missing(final EuroCoin... coins) {
             vendingMachine.setPrice(0, 100);
             vendingMachine.addProducts(0, "Coke");
 
@@ -242,9 +242,9 @@ class ArvatoVendingMachineTest {
     @Nested
     class AddCoins {
 
-        @EnumSource(EuroCoins.class)
+        @EnumSource(EuroCoin.class)
         @ParameterizedTest
-        void should_add_coins(final EuroCoins coin) {
+        void should_add_coins(final EuroCoin coin) {
             vendingMachine.addCoins(coin, coin);
 
             assertThat(vendingMachine.emptyCoin(coin)).isEqualTo(2);
@@ -257,23 +257,23 @@ class ArvatoVendingMachineTest {
         void should_return_coins_for_sold_products() {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
-            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
-            assertThat(vendingMachine.emptyCoin(EuroCoins.TWO_EURO)).isEqualTo(0);
-            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoins.FIFTY_CENTS)).isEqualTo(0);
-            assertThat(vendingMachine.emptyCoin(EuroCoins.TWENTY_CENTS)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoins.TEN_CENTS)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.TWO_EURO)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.FIFTY_CENTS)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.TWENTY_CENTS)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.TEN_CENTS)).isEqualTo(0);
         }
 
         @Test
         void should_return_not_return_coins_twice() {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
-            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            vendingMachine.buy(0, EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS);
 
-            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(1);
-            assertThat(vendingMachine.emptyCoin(EuroCoins.ONE_EURO)).isEqualTo(0);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(1);
+            assertThat(vendingMachine.emptyCoin(EuroCoin.ONE_EURO)).isEqualTo(0);
         }
     }
 
@@ -393,10 +393,10 @@ class ArvatoVendingMachineTest {
 
     static class ChangeTestCase implements Named<ChangeTestCase> {
         private String      name;
-        private int         price;
-        private EuroCoins[] availableChange;
-        private EuroCoins[] insertedCoins;
-        private EuroCoins[] expectedChange;
+        private int        price;
+        private EuroCoin[] availableChange;
+        private EuroCoin[] insertedCoins;
+        private EuroCoin[] expectedChange;
 
         ChangeTestCase(final String name) {
             this.name = name;
@@ -417,17 +417,17 @@ class ArvatoVendingMachineTest {
             return this;
         }
 
-        ChangeTestCase withAvailableChange(final EuroCoins... availableChange) {
+        ChangeTestCase withAvailableChange(final EuroCoin... availableChange) {
             this.availableChange = availableChange;
             return this;
         }
 
-        ChangeTestCase withInsertedCoins(final EuroCoins... insertedCoins) {
+        ChangeTestCase withInsertedCoins(final EuroCoin... insertedCoins) {
             this.insertedCoins = insertedCoins;
             return this;
         }
 
-        ChangeTestCase withExpectedChange(final EuroCoins... expectedChange) {
+        ChangeTestCase withExpectedChange(final EuroCoin... expectedChange) {
             this.expectedChange = expectedChange;
             return this;
         }

@@ -1,6 +1,6 @@
 package de.luvetter;
 
-public enum EuroCoins {
+public enum EuroCoin {
     TWO_EURO(200),
     ONE_EURO(100),
     FIFTY_CENTS(50),
@@ -12,7 +12,7 @@ public enum EuroCoins {
 //    ONE_CENT(1)
     ;
 
-     EuroCoins(final int cents) {
+     EuroCoin(final int cents) {
         this.cents = cents;
     }
 
