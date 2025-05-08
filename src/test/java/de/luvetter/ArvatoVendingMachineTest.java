@@ -3,6 +3,8 @@ package de.luvetter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -24,14 +26,14 @@ class ArvatoVendingMachineTest {
 
     @BeforeEach
     void createEmptyVendingMachine() {
-        vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+        final List<ProductStash> inventories = createDefaultInventories();
+        vendingMachine = new ArvatoVendingMachine(inventories);
     }
 
-    @Test
-    void constructor_should_throw_IllegalArgumentException_if_number_of_slot_is_less_than_one() {
-        final int numberOfSlots = 0;
-
-        assertThatThrownBy(() -> new ArvatoVendingMachine(numberOfSlots))
+    @NullAndEmptySource
+    @ParameterizedTest
+    void constructor_should_throw_IllegalArgumentException_if_number_of_slot_is_less_than_one(final List<ProductStash> inventories) {
+        assertThatThrownBy(() -> new ArvatoVendingMachine(inventories))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Die Anzahl der Slots muss mindestens 1 sein");
     }
@@ -103,13 +105,14 @@ class ArvatoVendingMachineTest {
                             .withPrice(80)
                             .withAvailableChange(EuroCoin.ONE_EURO, EuroCoin.FIFTY_CENTS, EuroCoin.TWENTY_CENTS, EuroCoin.TEN_CENTS)
                             .withInsertedCoins(EuroCoin.TWO_EURO)
-                            .withExpectedChange(EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS)//,
+                            .withExpectedChange(EuroCoin.ONE_EURO, EuroCoin.TWENTY_CENTS)
+                    //,
                     // TODO: Wechselgeld algoryhtmus so erweitern, dass auch Münzgrößen geskippt werden, die von der Größe passen, aber nicht genug kleiner Gößen vergügbar sind, um die Summe passend zu bekommen
-//                    new ChangeTestCase("return 80 cent with 4x 20 coins even if 50 is available, but no 10 cent")
-//                            .withPrice(120)
-//                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
-//                            .withInsertedCoins(EuroCoins.TWO_EURO)
-//                            .withExpectedChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
+                    //                    new ChangeTestCase("return 80 cent with 4x 20 coins even if 50 is available, but no 10 cent")
+                    //                            .withPrice(120)
+                    //                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
+                    //                            .withInsertedCoins(EuroCoins.TWO_EURO)
+                    //                            .withExpectedChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
             );
         }
 
@@ -364,7 +367,7 @@ class ArvatoVendingMachineTest {
         @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
         @ParameterizedTest
         void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(createDefaultInventories());
 
             assertThatThrownBy(() -> vendingMachine.removeProducts(slot))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -382,7 +385,7 @@ class ArvatoVendingMachineTest {
         // Regression Test für NullPointerException, wenn Slot noch nie befüllt wurde
         @Test
         void should_throw_IllegalArgumentException_if_slot_is_still_virgin() {
-            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(createDefaultInventories());
 
             assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -391,12 +394,16 @@ class ArvatoVendingMachineTest {
         }
     }
 
+    private List<ProductStash> createDefaultInventories() {
+        return IntStream.range(0, NUMBER_OF_SLOTS).mapToObj(value -> new ProductStash()).toList();
+    }
+
     static class ChangeTestCase implements Named<ChangeTestCase> {
-        private String      name;
-        private int        price;
-        private EuroCoin[] availableChange;
-        private EuroCoin[] insertedCoins;
-        private EuroCoin[] expectedChange;
+        private final String     name;
+        private       int        price;
+        private       EuroCoin[] availableChange;
+        private       EuroCoin[] insertedCoins;
+        private       EuroCoin[] expectedChange;
 
         ChangeTestCase(final String name) {
             this.name = name;

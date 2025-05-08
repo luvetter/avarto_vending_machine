@@ -3,7 +3,6 @@ package de.luvetter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public class ArvatoVendingMachine {
 
@@ -11,11 +10,11 @@ public class ArvatoVendingMachine {
     private final Map<Integer, Integer> prices       = new HashMap<>();
     private final CashRegister          cashRegister = new CashRegister();
 
-    public ArvatoVendingMachine(final int numberOfSlots) {
-        if (numberOfSlots < 1) {
+    public ArvatoVendingMachine(final List<ProductStash> inventories) {
+        if (inventories == null || inventories.isEmpty()) {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
-        inventories = IntStream.range(0, numberOfSlots).mapToObj(value -> new ProductStash()).toList();
+        this.inventories = inventories;
     }
 
     public ProductAndChange buy(final int slot, final EuroCoin... coins) {
