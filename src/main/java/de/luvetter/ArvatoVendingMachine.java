@@ -2,6 +2,7 @@ package de.luvetter;
 
 import java.util.List;
 
+// TODO: Java-Doc (überall)
 public class ArvatoVendingMachine {
 
     private final List<Slot>    slots;
