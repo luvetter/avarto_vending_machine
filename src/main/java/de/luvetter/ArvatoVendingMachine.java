@@ -27,17 +27,27 @@ public class ArvatoVendingMachine {
         if (inventory.isEmpty()) {
             throw new IllegalStateException("Slot " + slot + " ist leer");
         }
-        if (coins == null || coins.length == 0) {
+        final int price = getPrice(slot);
+        final int totalInserted = calculateTotalInserted(coins);
+        validateInsetCoversPrice(slot, price, totalInserted);
+        return new ProductAndChange(inventory.poll());
+    }
+
+    private void validateInsetCoversPrice(final int slot, final int price, final int totalInserted) {
+        if (price > 0 && totalInserted == 0) {
             throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
-        final int price = getPrice(slot);
-        final int totalInserted = Arrays.stream(coins)
-                                        .mapToInt(EuroCoins::getCents)
-                                        .sum();
         if (totalInserted < price) {
             throw new IllegalArgumentException("Slot " + slot + " kostet " + price + " Cent");
         }
-        return new ProductAndChange(inventory.poll());
+    }
+
+    private int calculateTotalInserted(final EuroCoins[] coins) {
+        return Stream.ofNullable(coins)
+                       .flatMap(Arrays::stream)
+                       .filter(Objects::nonNull)
+                       .mapToInt(EuroCoins::getCents)
+                       .sum();
     }
 
     public void setPrice(final int slot, final int cents) {

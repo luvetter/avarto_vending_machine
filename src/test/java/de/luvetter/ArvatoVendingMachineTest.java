@@ -71,6 +71,18 @@ class ArvatoVendingMachineTest {
         }
 
         @Test
+        void should_return_product_without_coins_if_price_is_free() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 0);
+
+            final ProductAndChange result = vendingMachine.buy(0);
+
+            assertThat(result).isNotNull()
+                    .extracting(ProductAndChange::product)
+                    .isEqualTo("Coke");
+        }
+
+        @Test
         void should_return_throw_IllegalArgumentException_if_coins_do_not_cover_price() {
             vendingMachine.addProducts(0, "Coke");
             vendingMachine.setPrice(0, 120);
