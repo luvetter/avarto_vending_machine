@@ -1,8 +1,16 @@
 package de.luvetter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ArvatoVendingMachine {
 
-    private final int numberOfSlots;
+    private final int                        numberOfSlots;
+    private final Map<Integer, List<Object>> products = new HashMap<>();
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
@@ -19,5 +27,17 @@ public class ArvatoVendingMachine {
             throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
         return null;
+    }
+
+    public void addProducts(final int slot, final Object... products) {
+        this.products.computeIfAbsent(slot, k -> new ArrayList<>()).addAll(Arrays.asList(products));
+    }
+
+    public List<Object> listProducts(final int slot) {
+        return Collections.unmodifiableList(this.products.getOrDefault(slot, Collections.emptyList()));
+    }
+
+    public void removeProducts(final int slot, final Object... products) {
+        this.products.get(slot).removeAll(Arrays.asList(products));
     }
 }

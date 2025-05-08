@@ -1,5 +1,6 @@
 package de.luvetter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
@@ -43,5 +44,34 @@ class ArvatoVendingMachineTest {
         assertThatThrownBy(() -> vendingMachine.buy( 0, coins))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Bitte werfen Sie Geld ein");
+    }
+
+    @Test
+    void addProducts_should_add_products_to_the_slot() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+
+        vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+    }
+
+    @Test
+    void listProducts_should_return_empty_list_if_no_products_in_slot() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+
+        assertThat(vendingMachine.listProducts(0)).isEmpty();
+    }
+
+    @Test
+    void removeProducts_should_remove_products_from_the_slot() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+        vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+        vendingMachine.removeProducts(0, "Coke");
+
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Pepsi");
     }
 }
