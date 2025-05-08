@@ -20,9 +20,7 @@ public class ArvatoVendingMachine {
     }
 
     public ProductAndChange buy(final int slot, final EuroCoins... coins) {
-        if (slot < 0 || slot >= numberOfSlots) {
-            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (numberOfSlots - 1));
-        }
+        validateSlotRange(slot);
         if (coins == null || coins.length == 0) {
             throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
@@ -30,14 +28,23 @@ public class ArvatoVendingMachine {
     }
 
     public void addProducts(final int slot, final Object... products) {
+        validateSlotRange(slot);
         this.products.computeIfAbsent(slot, k -> new ArrayList<>()).addAll(Arrays.asList(products));
     }
 
     public List<Object> listProducts(final int slot) {
+        validateSlotRange(slot);
         return Collections.unmodifiableList(this.products.getOrDefault(slot, Collections.emptyList()));
     }
 
     public void removeProducts(final int slot, final Object... products) {
+        validateSlotRange(slot);
         this.products.get(slot).removeAll(Arrays.asList(products));
+    }
+
+    private void validateSlotRange(final int slot) {
+        if (slot < 0 || slot >= numberOfSlots) {
+            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (numberOfSlots - 1));
+        }
     }
 }
