@@ -53,6 +53,8 @@ public class CashRegister {
     // TODO: Findet aktuell nur in "einfachen" Fällen eine Lösung
     //      Erkennt z.b. nicht, das für 80 Cent 4x 20 Cent Münzen auch gehen, wenn eine 50 Cent Münze, aber keine 10 Cent Münze vorhanden ist
     // TODO: Eingeworfene Münzen wieder aus dem Stash entfernen, wenn kein Wechselgeld gegeben werden kann
+    //      --> Hierfür die Münzen garnicht einzahlen, sondern erst schauen, ob davon welche "über" sind, also nicht für den Preis gebraucht werden
+    //          und direkt abziehen. Von dem Rest dürfte dann nix als Wechselgeld über bleiben?
     private EuroCoin[] getChange(final int targetChangeSum) {
         int currentChangeSum = 0;
         final List<EuroCoin> change = new ArrayList<>();
@@ -70,6 +72,8 @@ public class CashRegister {
             }
         }
         if (currentChangeSum != targetChangeSum) {
+            // TODO: Schleife ohne die größte verfügbare Münzen wiederholen und erst Excpetion werfen, wenn man auch mit nur der kleinsten Münze nicht klar kommt.
+            //          Würde das alle Fälle abdecken?
             throw new IllegalStateException("Nicht genug Wechselgeld im Automaten");
         }
 
