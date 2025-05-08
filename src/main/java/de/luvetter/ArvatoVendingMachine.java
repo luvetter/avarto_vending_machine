@@ -22,7 +22,6 @@ public class ArvatoVendingMachine {
     }
 
     public ProductAndChange buy(final int slot, final EuroCoins... coins) {
-        validateSlotRange(slot);
         if (coins == null || coins.length == 0) {
             throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
@@ -34,18 +33,15 @@ public class ArvatoVendingMachine {
     }
 
     public void addProducts(final int slot, final Object... products) {
-        validateSlotRange(slot);
         final List<Object> inventory = getInventory(slot);
         filterNullValues(products).forEach(inventory::add);
     }
 
     public List<Object> listProducts(final int slot) {
-        validateSlotRange(slot);
         return Collections.unmodifiableList(getInventory(slot));
     }
 
     public void removeProducts(final int slot, final Object... products) {
-        validateSlotRange(slot);
         final List<Object> inventory = getInventory(slot);
         final List<Object> toBeRemoved = filterNullValues(products).toList();
         assertProductsAreRemoveable(slot, toBeRemoved, inventory);
@@ -53,6 +49,7 @@ public class ArvatoVendingMachine {
     }
 
     private List<Object> getInventory(final int slot) {
+        validateSlotRange(slot);
         return this.products.computeIfAbsent(slot, k -> new ArrayList<>());
     }
 
