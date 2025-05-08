@@ -35,8 +35,6 @@ public class ArvatoVendingMachine {
             throw new IllegalStateException("Slot " + slot + " ist leer");
         }
         final int price = getPrice(slot);
-        final int totalInserted = calculateTotalInserted(coins);
-        validateInsetCoversPrice(slot, price, totalInserted);
         final EuroCoin[] change = cashRegister.getChange(price, coins);
         return new ProductAndChange(inventory.poll(), change);
     }
@@ -47,23 +45,6 @@ public class ArvatoVendingMachine {
 
     public int emptyCoinType(final EuroCoin coin) {
         return cashRegister.emptyCoinType(coin);
-    }
-
-    private void validateInsetCoversPrice(final int slot, final int price, final int totalInserted) {
-        if (price > 0 && totalInserted == 0) {
-            throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
-        }
-        if (totalInserted < price) {
-            throw new IllegalArgumentException("Slot " + slot + " kostet " + price + " Cent");
-        }
-    }
-
-    private int calculateTotalInserted(final EuroCoin[] coins) {
-        return Stream.ofNullable(coins)
-                       .flatMap(Arrays::stream)
-                       .filter(Objects::nonNull)
-                       .mapToInt(EuroCoin::getCents)
-                       .sum();
     }
 
     public void setPrice(final int slot, final int cents) {

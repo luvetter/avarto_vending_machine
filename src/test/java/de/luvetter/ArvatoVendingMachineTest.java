@@ -168,7 +168,7 @@ class ArvatoVendingMachineTest {
 
             assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoin.ONE_EURO))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Slot 0 kostet 120 Cent");
+                    .hasMessageContaining("Der gewählte Slot kostet 120 Cent, aber es wurden nur 100 Cent eingeworfen");
         }
 
         @Test

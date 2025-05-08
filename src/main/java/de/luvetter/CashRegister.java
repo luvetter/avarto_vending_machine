@@ -19,8 +19,9 @@ public class CashRegister {
     }
 
     public EuroCoin[] getChange(final int price, final EuroCoin[] coins) {
-        addCoins(coins);
         final int totalInserted = calculateTotalInserted(coins);
+        validateInsertedCoversPrice(price, totalInserted);
+        addCoins(coins);
         return getChange(totalInserted - price);
     }
 
@@ -36,6 +37,15 @@ public class CashRegister {
                        .filter(Objects::nonNull)
                        .mapToInt(EuroCoin::getCents)
                        .sum();
+    }
+
+    private void validateInsertedCoversPrice(final int price, final int totalInserted) {
+        if (price > 0 && totalInserted == 0) {
+            throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
+        }
+        if (totalInserted < price) {
+            throw new IllegalArgumentException("Der gewählte Slot kostet " + price + " Cent, aber es wurden nur " + totalInserted + " Cent eingeworfen");
+        }
     }
 
     private EuroCoin[] getChange(final int targetChangeSum) {
