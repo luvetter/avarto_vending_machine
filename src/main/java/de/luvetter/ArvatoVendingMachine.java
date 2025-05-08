@@ -3,19 +3,19 @@ package de.luvetter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class ArvatoVendingMachine {
 
-    private final int                        numberOfSlots;
-    private final Map<Integer, ProductStash> products     = new HashMap<>();
-    private final Map<Integer, Integer>      prices       = new HashMap<>();
-    private final CashRegister               cashRegister = new CashRegister();
+    private final List<ProductStash>    inventories;
+    private final Map<Integer, Integer> prices       = new HashMap<>();
+    private final CashRegister          cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
-        this.numberOfSlots = numberOfSlots;
+        inventories = IntStream.range(0, numberOfSlots).mapToObj(value -> new ProductStash()).toList();
     }
 
     public ProductAndChange buy(final int slot, final EuroCoin... coins) {
@@ -63,12 +63,12 @@ public class ArvatoVendingMachine {
 
     private ProductStash getProductStash(final int slot) {
         validateSlotRange(slot);
-        return this.products.computeIfAbsent(slot, k -> new ProductStash());
+        return this.inventories.get(slot);
     }
 
     private void validateSlotRange(final int slot) {
-        if (slot < 0 || slot >= numberOfSlots) {
-            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (numberOfSlots - 1));
+        if (slot < 0 || slot >= inventories.size()) {
+            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (inventories.size() - 1));
         }
     }
 }
