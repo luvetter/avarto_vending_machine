@@ -1,5 +1,6 @@
 package de.luvetter;
 
+// TODO: Oberes Limit einführen
 public class CoinStash {
     private int amount;
 

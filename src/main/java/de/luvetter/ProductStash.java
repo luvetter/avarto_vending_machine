@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.stream.Stream;
 
+// TODO: Oberes Limit einführen
 public class ProductStash {
 
     private final Queue<Object> products = new ArrayDeque<>();

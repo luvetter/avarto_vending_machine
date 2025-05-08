@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+// TODO: "Kasse" für Geld, dass nicht in Wechselgeld Stash passt
+// TODO: Fremde Münzen / Objekte abweisen
 public class CashRegister {
 
     private final Map<EuroCoin, CoinStash> stash = new EnumMap<>(EuroCoin.class);
@@ -48,6 +50,9 @@ public class CashRegister {
         }
     }
 
+    // TODO: Findet aktuell nur in "einfachen" Fällen eine Lösung
+    //      Erkennt z.b. nicht, das für 80 Cent 4x 20 Cent Münzen auch gehen, wenn eine 50 Cent Münze, aber keine 10 Cent Münze vorhanden ist
+    // TODO: Eingeworfene Münzen wieder aus dem Stash entfernen, wenn kein Wechselgeld gegeben werden kann
     private EuroCoin[] getChange(final int targetChangeSum) {
         int currentChangeSum = 0;
         final List<EuroCoin> change = new ArrayList<>();
