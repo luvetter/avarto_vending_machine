@@ -26,6 +26,10 @@ public class ArvatoVendingMachine {
         if (coins == null || coins.length == 0) {
             throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
+        final List<Object> inventory = getInventory(slot);
+        if (inventory.isEmpty()) {
+            throw new IllegalStateException("Slot " + slot + " ist leer");
+        }
         return null;
     }
 

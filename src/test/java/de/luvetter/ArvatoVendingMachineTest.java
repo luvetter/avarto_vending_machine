@@ -32,6 +32,13 @@ class ArvatoVendingMachineTest {
 
     @Nested
     class Buy {
+        @Test
+        void should_throw_IllegalStateException_if_slot_is_empty() {
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.TWO_EURO))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Slot 0 ist leer");
+        }
+
         @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
         @ParameterizedTest
         void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
