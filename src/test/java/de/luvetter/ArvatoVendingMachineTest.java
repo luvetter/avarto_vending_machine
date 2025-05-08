@@ -3,6 +3,7 @@ package de.luvetter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -21,130 +22,146 @@ class ArvatoVendingMachineTest {
                 .hasMessageContaining("Die Anzahl der Slots muss mindestens 1 sein");
     }
 
-    @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
-    @ParameterizedTest
-    void buy_should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+    @Nested
+    class Buy {
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
 
-        assertThatThrownBy(() -> vendingMachine.buy(slot, EuroCoins.TWO_EURO))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+            assertThatThrownBy(() -> vendingMachine.buy(slot, EuroCoins.TWO_EURO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+        }
+
+        @NullAndEmptySource
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_if_coins_is_missing(final EuroCoins... coins) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            assertThatThrownBy(() -> vendingMachine.buy(0, coins))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte werfen Sie Geld ein");
+        }
     }
 
-    @NullAndEmptySource
-    @ParameterizedTest
-    void buy_should_throw_IllegalArgumentException_if_coins_is_missing(final EuroCoins... coins) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+    @Nested
+    class AddProducts {
 
-        assertThatThrownBy(() -> vendingMachine.buy(0, coins))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Bitte werfen Sie Geld ein");
+        @Test
+        void should_add_products_to_the_slot() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+        }
+
+        @NullAndEmptySource
+        @ParameterizedTest
+        void should_ignore_null_and_empty_products(final Object... products) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            vendingMachine.addProducts(0, products);
+
+            assertThat(vendingMachine.listProducts(0)).isEmpty();
+        }
+
+        @Test
+        void should_ignore_null_product() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            vendingMachine.addProducts(0, "Coke", null, "Pepsi");
+
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+        }
+
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            assertThatThrownBy(() -> vendingMachine.addProducts(slot))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+        }
     }
 
-    @Test
-    void addProducts_should_add_products_to_the_slot() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+    @Nested
+    class ListProducts {
 
-        vendingMachine.addProducts(0, "Coke", "Pepsi");
+        @Test
+        void should_return_empty_list_if_no_products_in_slot() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
 
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+            assertThat(vendingMachine.listProducts(0)).isEmpty();
+        }
+
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            assertThatThrownBy(() -> vendingMachine.listProducts(slot))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+        }
     }
 
-    @NullAndEmptySource
-    @ParameterizedTest
-    void addProducts_should_ignore_null_and_empty_products(final Object... products) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+    @Nested
+    class RemoveProducts {
 
-        vendingMachine.addProducts(0, products);
 
-        assertThat(vendingMachine.listProducts(0)).isEmpty();
-    }
+        @Test
+        void should_remove_products_from_the_slot() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
 
-    @Test
-    void addProducts_should_ignore_null_product() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.removeProducts(0, "Coke");
 
-        vendingMachine.addProducts(0, "Coke", null, "Pepsi");
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Pepsi");
+        }
 
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
-    }
+        @NullAndEmptySource
+        @ParameterizedTest
+        void should_ignore_null_and_empty_products(final Object... products) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
 
-    @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
-    @ParameterizedTest
-    void addProducts_should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.removeProducts(0, products);
 
-        assertThatThrownBy(() -> vendingMachine.addProducts(slot))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
-    }
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+        }
 
-    @Test
-    void listProducts_should_return_empty_list_if_no_products_in_slot() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+        @Test
+        void should_ignore_null_product() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
 
-        assertThat(vendingMachine.listProducts(0)).isEmpty();
-    }
+            vendingMachine.removeProducts(0, null, "Pepsi");
 
-    @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
-    @ParameterizedTest
-    void listProducts_should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke");
+        }
 
-        assertThatThrownBy(() -> vendingMachine.listProducts(slot))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
-    }
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
 
-    @Test
-    void removeProducts_should_remove_products_from_the_slot() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
-        vendingMachine.addProducts(0, "Coke", "Pepsi");
+            assertThatThrownBy(() -> vendingMachine.removeProducts(slot))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+        }
 
-        vendingMachine.removeProducts(0, "Coke");
+        @Test
+        void should_throw_IllegalArgumentException_if_slot_does_not_contain_product() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
 
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Pepsi");
-    }
-
-    @NullAndEmptySource
-    @ParameterizedTest
-    void removeProducts_should_ignore_null_and_empty_products(final Object... products) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
-        vendingMachine.addProducts(0, "Coke", "Pepsi");
-
-        vendingMachine.removeProducts(0, products);
-
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
-    }
-
-    @Test
-    void removeProducts_should_ignore_null_product() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
-        vendingMachine.addProducts(0, "Coke", "Pepsi");
-
-        vendingMachine.removeProducts(0, null, "Pepsi");
-
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke");
-    }
-
-    @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
-    @ParameterizedTest
-    void removeProducts_should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
-
-        assertThatThrownBy(() -> vendingMachine.removeProducts(slot))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
-    }
-
-    @Test
-    void removeProducts_should_throw_IllegalArgumentException_if_slot_does_not_contain_product() {
-        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
-        vendingMachine.addProducts(0, "Coke", "Pepsi");
-
-        assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
-        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+            assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
+            assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+        }
     }
 }
