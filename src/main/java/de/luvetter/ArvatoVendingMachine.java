@@ -31,21 +31,25 @@ public class ArvatoVendingMachine {
 
     public void addProducts(final int slot, final Object... products) {
         validateSlotRange(slot);
-        final List<Object> inventory = this.products.computeIfAbsent(slot, k -> new ArrayList<>());
+        final List<Object> inventory = getInventory(slot);
         filterNullValues(products).forEach(inventory::add);
     }
 
     public List<Object> listProducts(final int slot) {
         validateSlotRange(slot);
-        return Collections.unmodifiableList(this.products.getOrDefault(slot, Collections.emptyList()));
+        return Collections.unmodifiableList(getInventory(slot));
     }
 
     public void removeProducts(final int slot, final Object... products) {
         validateSlotRange(slot);
-        final List<Object> inventory = this.products.get(slot);
+        final List<Object> inventory = getInventory(slot);
         final List<Object> toBeRemoved = filterNullValues(products).toList();
         assertProductsAreRemoveable(slot, toBeRemoved, inventory);
         inventory.removeAll(toBeRemoved);
+    }
+
+    private List<Object> getInventory(final int slot) {
+        return this.products.computeIfAbsent(slot, k -> new ArrayList<>());
     }
 
     private void validateSlotRange(final int slot) {

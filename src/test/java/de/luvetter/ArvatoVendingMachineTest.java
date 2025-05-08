@@ -150,5 +150,16 @@ class ArvatoVendingMachineTest {
                     .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
             assertThat(vendingMachine.listProducts(0)).containsExactly(COKE, PEPSI);
         }
+
+        // Regression Test für NullPointerException, wenn Slot noch nie befüllt wurde
+        @Test
+        void should_throw_IllegalArgumentException_if_slot_is_still_virgin() {
+            final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(NUMBER_OF_SLOTS);
+
+            assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
+            assertThat(vendingMachine.listProducts(0)).isEmpty();
+        }
     }
 }
