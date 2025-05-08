@@ -15,14 +15,6 @@ public class ProductStash {
         products.add(product);
     }
 
-    public void removeAll(List<Object> toBeRemoved) {
-        products.removeAll(toBeRemoved);
-    }
-
-    public boolean contains(Object product) {
-        return products.contains(product);
-    }
-
     public List<Object> listProducts() {
         return products.stream().toList();
     }
@@ -35,11 +27,11 @@ public class ProductStash {
         return products.poll();
     }
 
-    public void addProducts(Object[] productsToAdd) {
+    public void addProducts(final Object[] productsToAdd) {
         filterNullValues(productsToAdd).forEach(products::add);
     }
 
-    public void removeProducts(Object[] productsToRemove) {
+    public void removeProducts(final Object[] productsToRemove) {
         final List<Object> toBeRemoved = filterNullValues(productsToRemove).toList();
         assertProductsAreRemoveable(toBeRemoved);
         products.removeAll(toBeRemoved);

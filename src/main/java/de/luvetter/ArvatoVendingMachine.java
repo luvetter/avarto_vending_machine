@@ -1,20 +1,17 @@
 package de.luvetter;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ArvatoVendingMachine {
 
-    private final List<ProductStash>    inventories;
-    private final Map<Integer, Integer> prices       = new HashMap<>();
+    private final List<Slot>    slots;
     private final CashRegister          cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final List<ProductStash> inventories) {
         if (inventories == null || inventories.isEmpty()) {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
-        this.inventories = inventories;
+        this.slots = inventories.stream().map(Slot::new).toList();
     }
 
     public ProductAndChange buy(final int slot, final EuroCoin... coins) {
@@ -36,16 +33,11 @@ public class ArvatoVendingMachine {
     }
 
     public void setPrice(final int slot, final int cents) {
-        validateSlotRange(slot);
-        if (cents < 0) {
-            throw new IllegalArgumentException("Der Preis muss positiv sein");
-        }
-        this.prices.put(slot, cents);
+        getSlot(slot).setPrice(cents);
     }
 
     public int getPrice(final int slot) {
-        validateSlotRange(slot);
-        return this.prices.getOrDefault(slot, 0);
+        return getSlot(slot).getPrice();
     }
 
     public void addProducts(final int slot, final Object... products) {
@@ -61,13 +53,38 @@ public class ArvatoVendingMachine {
     }
 
     private ProductStash getProductStash(final int slot) {
+        return getSlot(slot).inventory;
+    }
+
+    private Slot getSlot(final int slot) {
         validateSlotRange(slot);
-        return this.inventories.get(slot);
+        return this.slots.get(slot);
     }
 
     private void validateSlotRange(final int slot) {
-        if (slot < 0 || slot >= inventories.size()) {
-            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (inventories.size() - 1));
+        if (slot < 0 || slot >= slots.size()) {
+            throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (slots.size() - 1));
+        }
+    }
+
+    private static class Slot {
+        private int price;
+        private final ProductStash inventory;
+
+        public Slot(final ProductStash inventory) {
+            this.inventory = inventory;
+            this.price = 0;
+        }
+
+        public int getPrice() {
+            return price;
+        }
+
+        public void setPrice(final int price) {
+            if (price < 0) {
+                throw new IllegalArgumentException("Der Preis muss positiv sein");
+            }
+            this.price = price;
         }
     }
 }
