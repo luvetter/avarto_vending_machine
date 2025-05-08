@@ -16,7 +16,6 @@ public class ArvatoVendingMachine {
     private final int                         numberOfSlots;
     private final Map<Integer, Queue<Object>> products     = new HashMap<>();
     private final Map<Integer, Integer>       prices       = new HashMap<>();
-    private final Map<EuroCoin, Integer>      register     = new EnumMap<>(EuroCoin.class);
     private final CashRegister                cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final int numberOfSlots) {
@@ -24,9 +23,6 @@ public class ArvatoVendingMachine {
             throw new IllegalArgumentException("Die Anzahl der Slots muss mindestens 1 sein");
         }
         this.numberOfSlots = numberOfSlots;
-        for (final EuroCoin coin : EuroCoin.values()) {
-            register.put(coin, 0);
-        }
     }
 
     public ProductAndChange buy(final int slot, final EuroCoin... coins) {
