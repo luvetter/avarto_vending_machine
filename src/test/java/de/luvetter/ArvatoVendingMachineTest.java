@@ -144,4 +144,16 @@ class ArvatoVendingMachineTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
     }
+
+    @Test
+    void removeProducts_should_throw_IllegalArgumentException_if_slot_does_not_contain_product() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+        vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+        assertThatThrownBy(() -> vendingMachine.removeProducts(0,"Fanta"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+    }
 }

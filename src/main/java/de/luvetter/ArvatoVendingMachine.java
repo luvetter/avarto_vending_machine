@@ -42,7 +42,10 @@ public class ArvatoVendingMachine {
 
     public void removeProducts(final int slot, final Object... products) {
         validateSlotRange(slot);
-        this.products.get(slot).removeAll(filterNullValues(products).toList());
+        final List<Object> inventory = this.products.get(slot);
+        final List<Object> toBeRemoved = filterNullValues(products).toList();
+        assertProductsAreRemoveable(slot, toBeRemoved, inventory);
+        inventory.removeAll(toBeRemoved);
     }
 
     private void validateSlotRange(final int slot) {
@@ -55,5 +58,13 @@ public class ArvatoVendingMachine {
         return Stream.ofNullable(products)
                        .flatMap(Arrays::stream)
                        .filter(Objects::nonNull);
+    }
+
+    private void assertProductsAreRemoveable(final int slot, final List<Object> toBeRemoved, final List<Object> inventory) {
+        for (final Object product : toBeRemoved) {
+            if (!inventory.remove(product)) {
+                throw new IllegalArgumentException("Produkt " + product + " nicht im Slot " + slot + " vorhanden");
+            }
+        }
     }
 }
