@@ -32,6 +32,54 @@ class ArvatoVendingMachineTest {
 
     @Nested
     class Buy {
+
+        @Test
+        void should_return_product_from_slot() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+
+            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(result).isNotNull()
+                    .extracting(ProductAndChange::product)
+                    .isEqualTo("Coke");
+        }
+
+        @Test
+        void should_remove_product_from_slot() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+
+            vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(vendingMachine.listProducts(0)).isEmpty();
+        }
+
+        @Test
+        void should_return_products_from_slot_in_order() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.addProducts(0, "Coke", "Pepsi");
+            vendingMachine.setPrice(0, 120);
+
+            final ProductAndChange result1 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            final ProductAndChange result2 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+            final ProductAndChange result3 = vendingMachine.buy(0, EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS);
+
+            assertThat(result1.product()).isEqualTo("Coke");
+            assertThat(result2.product()).isEqualTo("Coke");
+            assertThat(result3.product()).isEqualTo("Pepsi");
+        }
+
+        @Test
+        void should_return_throw_IllegalArgumentException_if_coins_do_not_cover_price() {
+            vendingMachine.addProducts(0, "Coke");
+            vendingMachine.setPrice(0, 120);
+
+            assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.ONE_EURO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Slot 0 kostet 120 Cent");
+        }
+
         @Test
         void should_throw_IllegalStateException_if_slot_is_empty() {
             assertThatThrownBy(() -> vendingMachine.buy(0, EuroCoins.TWO_EURO))
@@ -53,6 +101,47 @@ class ArvatoVendingMachineTest {
             assertThatThrownBy(() -> vendingMachine.buy(0, coins))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Bitte werfen Sie Geld ein");
+        }
+    }
+
+    @Nested
+    class SetPrice {
+        @Test
+        void should_set_price_for_the_slot() {
+            vendingMachine.setPrice(0, 100);
+
+            assertThat(vendingMachine.getPrice(0)).isEqualTo(100);
+        }
+
+        @Test
+        void should_throw_IllegalArgumentException_if_price_is_negative() {
+            assertThatThrownBy(() -> vendingMachine.setPrice(0, -1))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Der Preis muss positiv sein");
+        }
+
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            assertThatThrownBy(() -> vendingMachine.setPrice(slot, 100))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
+        }
+    }
+
+    @Nested
+    class GetPrice {
+        @Test
+        void should_return_zero_if_price_for_slot_is_not_configured() {
+            assertThat(vendingMachine.getPrice(0)).isEqualTo(0);
+        }
+
+        @ValueSource(ints = {-1, NUMBER_OF_SLOTS})
+        @ParameterizedTest
+        void should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
+            assertThatThrownBy(() -> vendingMachine.getPrice(slot))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Bitte wähle einen Slot zwischen 0 und 8");
         }
     }
 

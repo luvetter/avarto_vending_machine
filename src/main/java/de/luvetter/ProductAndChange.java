@@ -1,4 +1,4 @@
 package de.luvetter;
 
-public record ProductAndChange() {
+public record ProductAndChange(Object product) {
 }
