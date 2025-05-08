@@ -49,6 +49,27 @@ class ArvatoVendingMachineTest {
         assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
     }
 
+    @NullAndEmptySource
+    @ParameterizedTest
+    void addProducts_should_ignore_null_and_empty_products(final Object... products) {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+
+        vendingMachine.addProducts(0, products);
+
+        assertThat(vendingMachine.listProducts(0)).isEmpty();
+    }
+
+    @Test
+    void addProducts_should_ignore_null_product() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+
+        vendingMachine.addProducts(0, "Coke", null, "Pepsi");
+
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+    }
+
     @ValueSource(ints = {-1, 9})
     @ParameterizedTest
     void addProducts_should_throw_IllegalArgumentException_for_invalid_slot(final int slot) {
@@ -88,6 +109,29 @@ class ArvatoVendingMachineTest {
         vendingMachine.removeProducts(0, "Coke");
 
         assertThat(vendingMachine.listProducts(0)).containsExactly("Pepsi");
+    }
+
+    @NullAndEmptySource
+    @ParameterizedTest
+    void removeProducts_should_ignore_null_and_empty_products(final Object... products) {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+        vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+        vendingMachine.removeProducts(0, products);
+
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke", "Pepsi");
+    }
+
+    @Test
+    void removeProducts_should_ignore_null_product() {
+        final int numberOfSlots = 9;
+        final ArvatoVendingMachine vendingMachine = new ArvatoVendingMachine(numberOfSlots);
+        vendingMachine.addProducts(0, "Coke", "Pepsi");
+
+        vendingMachine.removeProducts(0,  null, "Pepsi");
+
+        assertThat(vendingMachine.listProducts(0)).containsExactly("Coke");
     }
 
     @ValueSource(ints = {-1, 9})
