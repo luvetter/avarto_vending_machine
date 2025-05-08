@@ -98,6 +98,9 @@ class ArvatoVendingMachineTest {
         @NullAndEmptySource
         @ParameterizedTest
         void should_throw_IllegalArgumentException_if_coins_is_missing(final EuroCoins... coins) {
+            vendingMachine.setPrice(0, 100);
+            vendingMachine.addProducts(0, "Coke");
+
             assertThatThrownBy(() -> vendingMachine.buy(0, coins))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Bitte werfen Sie Geld ein");

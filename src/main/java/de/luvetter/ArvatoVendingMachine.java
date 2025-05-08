@@ -1,9 +1,7 @@
 package de.luvetter;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +23,12 @@ public class ArvatoVendingMachine {
     }
 
     public ProductAndChange buy(final int slot, final EuroCoins... coins) {
-        if (coins == null || coins.length == 0) {
-            throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
-        }
         final Queue<Object> inventory = getInventory(slot);
         if (inventory.isEmpty()) {
             throw new IllegalStateException("Slot " + slot + " ist leer");
+        }
+        if (coins == null || coins.length == 0) {
+            throw new IllegalArgumentException("Bitte werfen Sie Geld ein");
         }
         final int price = getPrice(slot);
         final int totalInserted = Arrays.stream(coins)
