@@ -3,12 +3,16 @@ package de.luvetter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.stream.Stream;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -59,17 +63,54 @@ class ArvatoVendingMachineTest {
                     .isEmpty();
         }
 
-        @Test
-        void should_return_change() {
+        @MethodSource("changeTestCases")
+        @ParameterizedTest
+        void should_return_change(final ChangeTestCase testCase) {
             vendingMachine.addProducts(0, "Coke");
-            vendingMachine.setPrice(0, 120);
-            vendingMachine.addCoins(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS);
+            vendingMachine.setPrice(0, testCase.price);
+            vendingMachine.addCoins(testCase.availableChange);
 
-            final ProductAndChange result = vendingMachine.buy(0, EuroCoins.TWO_EURO);
+            final ProductAndChange result = vendingMachine.buy(0, testCase.insertedCoins);
 
             assertThat(result).isNotNull()
                     .extracting(ProductAndChange::change, InstanceOfAssertFactories.ARRAY)
-                    .containsExactlyInAnyOrder(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS);
+                    .containsExactlyInAnyOrder(testCase.expectedChange);
+        }
+
+        static Stream<ChangeTestCase> changeTestCases() {
+            return Stream.of(
+                    new ChangeTestCase("return 80 cent in 20 cent coins")
+                            .withPrice(120)
+                            .withAvailableChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
+                            .withInsertedCoins(EuroCoins.TWO_EURO)
+                            .withExpectedChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS),
+                    new ChangeTestCase("return 80 cent with just inserted 50 cent coin")
+                            .withPrice(120)
+                            .withAvailableChange(EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
+                            .withInsertedCoins(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS)
+                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS),
+                    new ChangeTestCase("return 80 cent in 50 cent, 20 cent and 10 cent coin")
+                            .withPrice(120)
+                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
+                            .withInsertedCoins(EuroCoins.TWO_EURO)
+                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS),
+                    new ChangeTestCase("return 120 cent with 2x 50 cent coins")
+                            .withPrice(80)
+                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
+                            .withInsertedCoins(EuroCoins.TWO_EURO)
+                            .withExpectedChange(EuroCoins.FIFTY_CENTS, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS),
+                    new ChangeTestCase("return 120 cent with 1x 1 euro coin")
+                            .withPrice(80)
+                            .withAvailableChange(EuroCoins.ONE_EURO, EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TEN_CENTS)
+                            .withInsertedCoins(EuroCoins.TWO_EURO)
+                            .withExpectedChange(EuroCoins.ONE_EURO, EuroCoins.TWENTY_CENTS)//,
+                    // TODO: Wechselgeld algoryhtmus so erweitern, dass auch Münzgrößen geskippt werden, die von der Größe passen, aber nicht genug kleiner Gößen vergügbar sind, um die Summe passend zu bekommen
+//                    new ChangeTestCase("return 80 cent with 4x 20 coins even if 50 is available, but no 10 cent")
+//                            .withPrice(120)
+//                            .withAvailableChange(EuroCoins.FIFTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
+//                            .withInsertedCoins(EuroCoins.TWO_EURO)
+//                            .withExpectedChange(EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS, EuroCoins.TWENTY_CENTS)
+            );
         }
 
         @Test
@@ -347,6 +388,48 @@ class ArvatoVendingMachineTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
             assertThat(vendingMachine.listProducts(0)).isEmpty();
+        }
+    }
+
+    static class ChangeTestCase implements Named<ChangeTestCase> {
+        private String      name;
+        private int         price;
+        private EuroCoins[] availableChange;
+        private EuroCoins[] insertedCoins;
+        private EuroCoins[] expectedChange;
+
+        ChangeTestCase(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public ChangeTestCase getPayload() {
+            return this;
+        }
+
+        ChangeTestCase withPrice(final int price) {
+            this.price = price;
+            return this;
+        }
+
+        ChangeTestCase withAvailableChange(final EuroCoins... availableChange) {
+            this.availableChange = availableChange;
+            return this;
+        }
+
+        ChangeTestCase withInsertedCoins(final EuroCoins... insertedCoins) {
+            this.insertedCoins = insertedCoins;
+            return this;
+        }
+
+        ChangeTestCase withExpectedChange(final EuroCoins... expectedChange) {
+            this.expectedChange = expectedChange;
+            return this;
         }
     }
 }
