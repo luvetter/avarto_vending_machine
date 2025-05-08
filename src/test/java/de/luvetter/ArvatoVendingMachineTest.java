@@ -375,7 +375,7 @@ class ArvatoVendingMachineTest {
         void should_throw_IllegalArgumentException_if_slot_does_not_contain_product() {
             assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
+                    .hasMessageContaining("Produkt Fanta nicht im Slot vorhanden");
             assertThat(vendingMachine.listProducts(0)).containsExactly(COKE, PEPSI);
         }
 
@@ -386,7 +386,7 @@ class ArvatoVendingMachineTest {
 
             assertThatThrownBy(() -> vendingMachine.removeProducts(0, "Fanta"))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Produkt Fanta nicht im Slot 0 vorhanden");
+                    .hasMessageContaining("Produkt Fanta nicht im Slot vorhanden");
             assertThat(vendingMachine.listProducts(0)).isEmpty();
         }
     }

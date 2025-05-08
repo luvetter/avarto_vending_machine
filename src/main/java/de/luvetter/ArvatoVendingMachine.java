@@ -1,22 +1,15 @@
 package de.luvetter;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.stream.Stream;
 
 public class ArvatoVendingMachine {
 
-    private final int                         numberOfSlots;
-    private final Map<Integer, Queue<Object>> products     = new HashMap<>();
-    private final Map<Integer, Integer>       prices       = new HashMap<>();
-    private final CashRegister                cashRegister = new CashRegister();
+    private final int                        numberOfSlots;
+    private final Map<Integer, ProductStash> products     = new HashMap<>();
+    private final Map<Integer, Integer>      prices       = new HashMap<>();
+    private final CashRegister               cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final int numberOfSlots) {
         if (numberOfSlots < 1) {
@@ -26,13 +19,13 @@ public class ArvatoVendingMachine {
     }
 
     public ProductAndChange buy(final int slot, final EuroCoin... coins) {
-        final Queue<Object> inventory = getInventory(slot);
+        final ProductStash inventory = getProductStash(slot);
         if (inventory.isEmpty()) {
             throw new IllegalStateException("Slot " + slot + " ist leer");
         }
         final int price = getPrice(slot);
         final EuroCoin[] change = cashRegister.getChange(price, coins);
-        return new ProductAndChange(inventory.poll(), change);
+        return new ProductAndChange(inventory.dropNext(), change);
     }
 
     public void addCoins(final EuroCoin... coins) {
@@ -57,43 +50,25 @@ public class ArvatoVendingMachine {
     }
 
     public void addProducts(final int slot, final Object... products) {
-        final Queue<Object> inventory = getInventory(slot);
-        filterNullValues(products).forEach(inventory::add);
+        getProductStash(slot).addProducts(products);
     }
 
     public List<Object> listProducts(final int slot) {
-        return getInventory(slot).stream().toList();
+        return getProductStash(slot).listProducts();
     }
 
     public void removeProducts(final int slot, final Object... products) {
-        final Queue<Object> inventory = getInventory(slot);
-        final List<Object> toBeRemoved = filterNullValues(products).toList();
-        assertProductsAreRemoveable(slot, toBeRemoved, inventory);
-        inventory.removeAll(toBeRemoved);
+        getProductStash(slot).removeProducts(products);
     }
 
-    private Queue<Object> getInventory(final int slot) {
+    private ProductStash getProductStash(final int slot) {
         validateSlotRange(slot);
-        return this.products.computeIfAbsent(slot, k -> new ArrayDeque<>());
+        return this.products.computeIfAbsent(slot, k -> new ProductStash());
     }
 
     private void validateSlotRange(final int slot) {
         if (slot < 0 || slot >= numberOfSlots) {
             throw new IllegalArgumentException("Bitte wähle einen Slot zwischen 0 und " + (numberOfSlots - 1));
-        }
-    }
-
-    private Stream<Object> filterNullValues(final Object[] products) {
-        return Stream.ofNullable(products)
-                       .flatMap(Arrays::stream)
-                       .filter(Objects::nonNull);
-    }
-
-    private void assertProductsAreRemoveable(final int slot, final List<Object> toBeRemoved, final Queue<Object> inventory) {
-        for (final Object product : toBeRemoved) {
-            if (!inventory.remove(product)) {
-                throw new IllegalArgumentException("Produkt " + product + " nicht im Slot " + slot + " vorhanden");
-            }
         }
     }
 }
