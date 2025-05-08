@@ -5,8 +5,8 @@ import java.util.List;
 // TODO: Java-Doc (überall)
 public class ArvatoVendingMachine {
 
-    private final List<Slot>    slots;
-    private final CashRegister          cashRegister = new CashRegister();
+    private final List<Slot>   slots;
+    private final CashRegister cashRegister = new CashRegister();
 
     public ArvatoVendingMachine(final List<ProductStash> inventories) {
         if (inventories == null || inventories.isEmpty()) {
@@ -69,7 +69,7 @@ public class ArvatoVendingMachine {
     }
 
     private static class Slot {
-        private int price;
+        private       int          price;
         private final ProductStash inventory;
 
         public Slot(final ProductStash inventory) {
